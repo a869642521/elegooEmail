@@ -1,0 +1,48 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to Tencent Cloud
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "${{ secrets.SERVER_PORT || '22' }}" "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy
+        shell: bash
+        run: |
+          ssh \
+            -i ~/.ssh/deploy_key \
+            -p "${{ secrets.SERVER_PORT || '22' }}" \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes \
+            "${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}" \
+            'bash -s' <<'EOF'
+          set -euo pipefail
+          cd "${APP_DIR:-/www/elegooEmail}"
+          chmod +x scripts/deploy-server.sh
+          APP_DIR="${APP_DIR:-/www/elegooEmail}" \
+          PM2_APP_NAME="${PM2_APP_NAME:-elegoo-email}" \
+          bash scripts/deploy-server.sh
+          EOF
