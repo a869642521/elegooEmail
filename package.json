@@ -1,0 +1,40 @@
+{
+  "name": "elegoo-webdesign",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "backfill:apple-thumbnails": "node scripts/backfill-apple-thumbnails.mjs",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.0",
+    "@types/mailparser": "^3.4.6",
+    "cheerio": "latest",
+    "clsx": "latest",
+    "imapflow": "^1.3.6",
+    "lucide-react": "latest",
+    "mailparser": "^3.9.9",
+    "next": "latest",
+    "playwright": "^1.60.0",
+    "react": "latest",
+    "react-dom": "latest",
+    "sharp": "^0.34.5",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "eslint": "latest",
+    "eslint-config-next": "latest",
+    "prisma": "^6.19.0",
+    "tailwindcss": "latest",
+    "typescript": "latest"
+  }
+}

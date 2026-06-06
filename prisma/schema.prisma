@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CaseType {
+  email
+  website
+  product_page
+}
+
+enum CaseStatus {
+  draft
+  published
+  archived
+}
+
+enum TagGroup {
+  style
+  industry
+  module
+  campaign
+  platform
+}
+
+model Case {
+  id            String      @id @default(cuid())
+  type          CaseType
+  title         String
+  slug          String      @unique
+  sourceUrl     String      @unique
+  brandName     String
+  industry      String?
+  summary       String
+  coverImageUrl String?
+  screenshotUrl String?
+  status        CaseStatus  @default(draft)
+  notes         String?
+  meta          Json        @default("{}")
+  tags          CaseTag[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String
+  group     TagGroup
+  cases     CaseTag[]
+  createdAt DateTime @default(now())
+
+  @@unique([name, group])
+}
+
+model CaseTag {
+  caseId String
+  tagId  String
+  case   Case   @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([caseId, tagId])
+}

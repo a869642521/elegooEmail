@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Elegoo Email Capture",
+  "version": "0.6.1",
+  "description": "Capture Email Love and Email Inspire pages from the signed-in browser and send structured data back to the local design library.",
+  "permissions": ["activeTab", "tabs", "scripting"],
+  "host_permissions": ["https://emaillove.com/*", "https://www.emailinspire.com/*", "https://emailinspire.com/*", "http://localhost/*", "http://127.0.0.1/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://localhost/*", "http://127.0.0.1/*"],
+      "js": ["admin-bridge.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
