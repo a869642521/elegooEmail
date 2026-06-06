@@ -5,6 +5,7 @@ import { CaseCard } from "@/components/case-card";
 import { CaseVisual } from "@/components/case-visual";
 import { EmailHtmlPreview } from "@/components/email-html-preview";
 import { FollowButton } from "@/components/follow-button";
+import { getCaseReceivedAt } from "@/lib/case-dates";
 import { caseTypeLabels } from "@/lib/case-labels";
 import { getCaseVisualSource } from "@/lib/case-visual-source";
 import { getCaseBySlug, listCases } from "@/lib/repository";
@@ -54,6 +55,8 @@ export default async function CaseDetail({ params }: { params: Promise<{ slug: s
     "importedHost",
     "fromName",
     "fromEmail",
+    "received",
+    "receivedAt",
     "subject",
     "preview",
     "sourceId",
@@ -72,6 +75,7 @@ export default async function CaseDetail({ params }: { params: Promise<{ slug: s
   const subject = item.meta.subject || item.title;
   const previewText = item.meta.preview || item.summary;
   const fromText = item.meta.fromName ? `${item.meta.fromName}${item.meta.fromEmail ? ` <${item.meta.fromEmail}>` : ""}` : item.brandName;
+  const receivedAt = getCaseReceivedAt(item);
 
   return (
     <main className="email-detail-page">
@@ -136,7 +140,7 @@ export default async function CaseDetail({ params }: { params: Promise<{ slug: s
               </div>
               <div>
                 <dt>收录时间</dt>
-                <dd>{formatDate(item.createdAt)}</dd>
+                <dd>{formatDate(receivedAt)}</dd>
               </div>
               <div>
                 <dt>发件方</dt>

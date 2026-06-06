@@ -1,5 +1,6 @@
 import { CaseCard } from "@/components/case-card";
 import { FilterToolbar } from "@/components/filter-toolbar";
+import { getCaseReceivedTime } from "@/lib/case-dates";
 import { listCases, listTagFacets } from "@/lib/repository";
 import type { CaseType } from "@/types/case";
 import { Search } from "lucide-react";
@@ -10,12 +11,14 @@ type SearchParams = Promise<{
   keyword?: string;
   brand?: string;
   tag?: string;
+  sort?: "newest" | "oldest";
 }>;
 
 export default async function Home({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const selectedType = params.type ?? "all";
   const selectedFeed = params.feed === "following" ? "following" : "featured";
+  const selectedSort = params.sort === "oldest" ? "oldest" : "newest";
   const [publishedCases, facets] = await Promise.all([
     listCases({
       type: selectedType,
@@ -26,7 +29,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
     }),
     listTagFacets()
   ]);
-  const cases =
+  const filteredCases =
     selectedFeed === "following"
       ? publishedCases.filter(
           (item) =>
@@ -34,6 +37,10 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
             item.tags.some((tag) => ["following", "followed", "关注"].includes(tag.name.toLowerCase()))
         )
       : publishedCases;
+  const cases = [...filteredCases].sort((a, b) => {
+    const diff = getCaseReceivedTime(b) - getCaseReceivedTime(a);
+    return selectedSort === "oldest" ? -diff : diff;
+  });
 
   return (
     <main>
@@ -47,6 +54,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
             <input name="keyword" defaultValue={params.keyword} placeholder="Search emails & brands..." />
             <input name="type" type="hidden" value={selectedType} />
             <input name="feed" type="hidden" value={selectedFeed} />
+            <input name="sort" type="hidden" value={selectedSort} />
             <input name="brand" type="hidden" value={params.brand ?? ""} />
             <input name="tag" type="hidden" value={params.tag ?? ""} />
           </form>
@@ -61,6 +69,7 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
             keyword={params.keyword}
             selectedBrand={params.brand}
             selectedTag={params.tag}
+            selectedSort={selectedSort}
             brands={facets.brands}
             tags={facets.tags}
           />

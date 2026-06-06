@@ -2,12 +2,15 @@ import Link from "next/link";
 import { BrandAvatar } from "@/components/brand-avatar";
 import { CaseVisual } from "@/components/case-visual";
 import { FollowButton } from "@/components/follow-button";
+import { getCaseReceivedAt } from "@/lib/case-dates";
 import { caseTypeLabels } from "@/lib/case-labels";
 import { getCaseVisualSource } from "@/lib/case-visual-source";
 import { formatDate } from "@/lib/utils";
 import type { CaseItem } from "@/types/case";
 
 export function CaseCard({ item }: { item: CaseItem }) {
+  const receivedAt = getCaseReceivedAt(item);
+
   return (
     <article className="case-card">
       <div className="case-card__header">
@@ -15,7 +18,7 @@ export function CaseCard({ item }: { item: CaseItem }) {
           <BrandAvatar brandName={item.brandName} />
           {item.brandName}
         </Link>
-        <time dateTime={item.updatedAt}>{formatDate(item.updatedAt)}</time>
+        <time dateTime={receivedAt}>{formatDate(receivedAt)}</time>
       </div>
       <div className="case-card__visual-wrap">
         <Link href={`/cases/${item.slug}`} aria-label={`查看 ${item.title}`}>

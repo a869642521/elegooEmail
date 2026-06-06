@@ -8,6 +8,10 @@ import { caseTypeLabels } from "@/lib/case-labels";
 import type { CaseTag, CaseType } from "@/types/case";
 
 const types: Array<CaseType | "all"> = ["all", "email", "website", "product_page"];
+const sortLabels = {
+  newest: "时间最新",
+  oldest: "时间最早"
+} as const;
 
 export function FilterToolbar({
   selectedType,
@@ -15,6 +19,7 @@ export function FilterToolbar({
   keyword,
   selectedBrand,
   selectedTag,
+  selectedSort,
   brands,
   tags
 }: {
@@ -23,11 +28,13 @@ export function FilterToolbar({
   keyword?: string;
   selectedBrand?: string;
   selectedTag?: string;
+  selectedSort: "newest" | "oldest";
   brands: string[];
   tags: CaseTag[];
 }) {
   const brandPickerRef = useRef<HTMLDetailsElement>(null);
   const tagPickerRef = useRef<HTMLDetailsElement>(null);
+  const sortPickerRef = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
     function closeOnOutsideClick(event: MouseEvent) {
@@ -37,7 +44,7 @@ export function FilterToolbar({
         return;
       }
 
-      for (const picker of [brandPickerRef.current, tagPickerRef.current]) {
+      for (const picker of [brandPickerRef.current, tagPickerRef.current, sortPickerRef.current]) {
         if (picker?.open && !picker.contains(target)) {
           picker.open = false;
         }
@@ -57,12 +64,17 @@ export function FilterToolbar({
     }, 0);
   }
 
-  function buildHref(next: { brand?: string; feed?: "following" | "featured"; tag?: string } = {}) {
+  function buildHref(next: { brand?: string; feed?: "following" | "featured"; tag?: string; sort?: "newest" | "oldest" } = {}) {
     const nextFeed = next.feed ?? selectedFeed;
+    const nextSort = next.sort ?? selectedSort;
     const params = new URLSearchParams();
 
     if (nextFeed !== "featured") {
       params.set("feed", nextFeed);
+    }
+
+    if (nextSort !== "newest") {
+      params.set("sort", nextSort);
     }
 
     if (selectedType !== "all") {
@@ -90,6 +102,7 @@ export function FilterToolbar({
     <form className="email-filters" action="/">
       <input name="keyword" type="hidden" value={keyword ?? ""} />
       <input name="feed" type="hidden" value={selectedFeed} />
+      <input name="sort" type="hidden" value={selectedSort} />
       <input name="brand" type="hidden" value={selectedBrand ?? ""} />
       <input name="tag" type="hidden" value={selectedTag ?? ""} />
 
@@ -126,6 +139,20 @@ export function FilterToolbar({
             {tags.map((tag) => (
               <Link className={selectedTag === tag.name ? "is-active" : ""} href={buildHref({ tag: tag.name })} key={tag.id}>
                 {tag.name}
+              </Link>
+            ))}
+          </div>
+        </details>
+        <details className="brand-picker sort-picker" ref={sortPickerRef}>
+          <summary>{sortLabels[selectedSort]}</summary>
+          <div className="brand-menu" onClick={() => closePicker(sortPickerRef)}>
+            {Object.entries(sortLabels).map(([sort, label]) => (
+              <Link
+                className={selectedSort === sort ? "is-active" : ""}
+                href={buildHref({ sort: sort as "newest" | "oldest" })}
+                key={sort}
+              >
+                {label}
               </Link>
             ))}
           </div>
